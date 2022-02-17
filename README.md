@@ -1,6 +1,6 @@
 # Python_encryption_toolbox
 
-This is Pyhton toolbox full of crypto functions.
+This is a Python tool full of crypto functions.
 
 
 It supports:
