@@ -23,21 +23,21 @@ def printChoices0() -> None:
     print("")
     print("\tWhat do You want?")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("\t(1) Hash a file\t\t\t\t\t\t -> Q(m) -> hash.txt")
-    print("\t(2) Verify hash of a file\t\t\t -> Q1(m) == Q2(m) ?")
+    print("\t(1) Hash a file\t\t\t\t -> Q(m) -> hash.txt")
+    print("\t(2) Verify hash of a file\t\t -> Q1(m) == Q2(m) ?")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("\t(3) Make AES / DES key\t\t\t\t -> k - key.txt")
+    print("\t(3) Make AES / DES key\t\t\t -> k - key.txt")
     print("\t(4) Symmetrically EnCrypt a file\t -> E(m, k)")
     print("\t(5) Symmetrically DeCrypt a file\t -> D(m, k)")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("\t(6) Make RSA keys\t\t\t\t\t -> (Pk, Sk) -> pk.pem & sk.pem")
+    print("\t(6) Make RSA keys\t\t\t\t -> (Pk, Sk) -> pk.pem & sk.pem")
     print("\t(7) Asymmetrically EnCrypt a file\t -> E(m, Pk)")
     print("\t(8) Asymmetrically DeCrypt a file\t -> D(m, Sk)")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("\t(9)  Pack digital envelope\t\t\t -> digital_envelope = { E(m, k); E(k, pkb) } -> de.zip = { *.c + key.txt.c }")
+    print("\t(9)  Pack digital envelope\t\t -> digital_envelope = { E(m, k); E(k, pkb) } -> de.zip = { *.c + key.txt.c }")
     print("\t(10) UnPack digital envelope\t\t -> de.zip = { *.c + key.txt.c }")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
-    print("\t(11) Sign a file\t\t\t\t\t -> digital_signature = { m; E[Q(m), ska] } -> ds.zip = { file.xyz + sig.s }")
+    print("\t(11) Sign a file\t\t\t -> digital_signature = { m; E[Q(m), ska] } -> ds.zip = { file.xyz + sig.s }")
     print("\t(12) Verify signature of a file\t\t -> ds.zip = { file.xyz + sig.s }")
     print("- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -")
     print("\t(q) Terminate program")
@@ -184,14 +184,35 @@ def symCrypt(fileName: str) -> None:
     if choice2 > 2 or choice2 < 1:
         print("Wrong input")
         return None
+    
+    userInput = input("(1) - key is in a file, (2) - input key: ")
+    choice3 = int(userInput)
+
+    if choice3 > 2 or choice3 < 1:
+        print("Wrong input")
+        return None
 
     mFile = open(fileName, "rb")
     msg = mFile.read()
     mFile.close()
-
-    fileKey = open("k.txt", "rb")
-    key = fileKey.read()
-    fileKey.close()
+    
+    if choice3 == 1:
+        keyFileName = input("key file: ")
+        fileKey = open(keyFileName, "rb")
+        key = fileKey.read()
+        fileKey.close()
+    else:
+        keyIn = input("key: ")
+        hash1 = SHA3_512.new()
+        hash1.update(keyIn.encode())
+        hash1 = hash1.hexdigest()
+        if choice == 1:
+            hash1 = hash1[0:16]
+        elif choice == 2:
+            hash1 = hash1[0:32]
+        else:
+            hash1 = hash1[0:24]
+        key = hash1.encode()
 
     if choice == 1 or choice == 2:
         if choice2 == 1:
@@ -237,14 +258,36 @@ def symDeCrypt(fileName: str) -> None:
     if choice2 > 2 or choice2 < 1:
         print("Wrong input")
         return None
+    
+    userInput = input("(1) - key is in a file, (2) - input key: ")
+    choice3 = int(userInput)
 
+    if choice3 > 2 or choice3 < 1:
+        print("Wrong input")
+        return None
+    
     cFile = open(fileName, "rb")
     cip = cFile.read()
     cFile.close()
 
-    fileKey = open("k.txt", "rb")
-    key = fileKey.read()
-    fileKey.close()
+    if choice3 == 1:
+        keyFileName = input("key file: ")
+        fileKey = open(keyFileName, "rb")
+        key = fileKey.read()
+        fileKey.close()
+    else:
+        keyIn = input("key: ")
+        hash1 = SHA3_512.new()
+        hash1.update(keyIn.encode())
+        hash1 = hash1.hexdigest()
+        if choice == 1:
+            hash1 = hash1[0:16]
+        elif choice == 2:
+            hash1 = hash1[0:32]
+        else:
+            hash1 = hash1[0:24]
+        key = hash1.encode()
+
 
     if choice == 1 or choice == 2:
         if choice2 == 1:
@@ -361,13 +404,13 @@ def main():
             print("Program terminated")
             return None
 
-        if choice < 1 or choice > 12:
-            print("Wrong input")
-            return None
-
         print("")
 
-        if choice == 1:
+        if choice < 1 or choice > 12:
+            print("Wrong input")
+
+
+        elif choice == 1:
             # SHA2/3
             userInput = input("File: ")
             hashFile(userInput)
@@ -431,14 +474,15 @@ def main():
 
         elif choice == 10:
             # UnPack digital envelope
-
-            zipEnvelope = ZipFile('de.zip', 'r')
+            
+            fileName = input("File: ")
+            zipEnvelope = ZipFile(fileName, 'r')
             zipEnvelope.extractall()
             zipEnvelope.close()
 
+            asymDeCrypt("k.txt.c")
             fileName = input("File: ")
             symDeCrypt(fileName)
-            asymDeCrypt("k.txt.c")
 
             print("Done")
 
@@ -468,7 +512,8 @@ def main():
         elif choice == 12:
             # Verify signature of a file
 
-            zipEnvelope = ZipFile('ds.zip', 'r')
+            fileName = input("File: ")
+            zipEnvelope = ZipFile(fileName, 'r')
             zipEnvelope.extractall()
             zipEnvelope.close()
 
